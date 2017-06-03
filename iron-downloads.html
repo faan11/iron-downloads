@@ -1,0 +1,91 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../mha-dialog-loading/mha-dialog-loading.html">
+<!--
+`iron-downloads`
+A component for launching multiple iron-download request.
+
+@demo demo/index.html
+-->
+
+<dom-module id="iron-downloads">
+  <template>
+    <style>
+      :host {
+        display: block;
+      }
+      content{
+        display:none;
+      }
+    </style>
+    <mha-dialog-loading id="mhaDialogLoading"> </mha-dialog-loading>
+    <content id="myContent"> </content>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'iron-downloads',
+
+      properties: {
+        parallel:{
+          type:Boolean,
+          value:false,
+          notify:true
+        },
+        auto:{
+          type:Boolean,
+          value:false,
+          notify:true
+        },
+        _countAnswer:{
+          type:Number,
+          value:0,
+          notify:true
+        }
+
+      },
+      attached:function(){
+        this.items = this.getContentChildren('#myContent');
+        if (this.auto==true){
+          this.generateRequest();
+        }
+        for ( i = 0; i < this.items.length; i++){
+          this.listen(this.items[i], 'response', 'onResponse');
+        }
+      },
+      detached:function(){
+        for ( i = 0; i < this.items.length; i++){
+          this.unlisten(this.items[i], 'response', 'onResponse');
+        }
+      },
+      onResponse:function(){
+        this._countAnswer++;
+        if (this.items.length == this._countAnswer){
+          this.$.mhaDialogLoading.close();
+          this.fire("response-all");
+        }else{
+          if (this.parallel == false){
+            this.items[this._countAnswer].generateRequest(); // launch the next
+          }
+        }
+
+      },
+      generateRequest:function(){
+        if (this.items.length == 0){
+          return;
+        }
+        this.$.mhaDialogLoading.open();
+        if (this.parallel == true){
+          for ( i = 0; i < this.items.length; i++){
+            this.items[i].generateRequest();
+          }
+        }else{
+          this.items[0].generateRequest();
+        }
+
+      }
+
+
+    });
+  </script>
+</dom-module>
