@@ -62,7 +62,7 @@ A component for launching multiple iron-download request.
         this._countAnswer++;
         if (this.items.length == this._countAnswer){
           this.$.mhaDialogLoading.close();
-          this.fire("response-all");
+          this.fire("response");
         }else{
           if (this.parallel == false){
             this.items[this._countAnswer].generateRequest(); // launch the next
